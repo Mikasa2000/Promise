@@ -43,6 +43,12 @@ function Promise(executor) {
 // 添加then方法
 Promise.prototype.then = function (onResolved, onRejected) {
   const that = this;
+  // 判断回调函数参数(异常穿透 中间的任务不需要对失败做处理)；
+  if(typeof onRejected !== 'function') {
+    onRejected = reason => {
+      throw reason;
+    }
+  }
 
   return new Promise((resolve, reject) => {
     function callback(type) {
@@ -87,3 +93,30 @@ Promise.prototype.then = function (onResolved, onRejected) {
 }
 
 // 添加catch方法
+Promise.prototype.catch = function (onRejected) {
+  return this.then(undefined,onRejected);
+}
+
+
+// 添加resolve方法
+Promise.resolve = function(value) {
+  return new Promise((resolve,reject) => {
+    if(value instanceof Promise) {
+      value.then((v)=>{resolve(v)},(r)=>{resolve(r)});
+    }else {
+      resolve(value);
+    }
+  });
+}
+
+// 添加reject方法
+Promise.reject = function(reason) {
+  return new Promise((resolve,reject)=>{
+    reject(reson);
+  })
+}
+
+// 添加all方法
+Promise.all = function(proms) {
+  
+}
