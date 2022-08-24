@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promise的封装</title>
+  <script src="./Promise.js"></script>
+</head>
+<body>
+  <script>
+    const p = new Promise((resolve,reject) => {
+      setTimeout(()=>{
+        resolve('success ok!');
+      },1000);
+
+      // resolve('success ok!');
+      
+      // reject('error');
+      // 抛出异常
+      // throw "error111"
+    });
+    console.log('p',p);
+
+    const result = p.then((value) => {
+      console.log(value);
+    },(err) => {
+      console.log(err);
+    })
+    console.log('result',result)
+    // p.then((value)=>{
+    //   console.log(value)
+    // })
+  </script>
+</body>
+</html>
