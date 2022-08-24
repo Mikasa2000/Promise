@@ -15,9 +15,11 @@ function Promise(executor) {
 
     // 2.修改对象的结果值[PromiseResult]
     that.PromiseResult = data;
-    that.callbacks.forEach(item => {
-      item.onResolved(data);
+    setTimeout(() => {
+      that.callbacks.forEach(item => {
+        item.onResolved(data);
 
+      })
     })
   }
   // 失败回调
@@ -25,8 +27,10 @@ function Promise(executor) {
     if (that.PromiseState !== 'pending') return;
     that.PromiseState = 'rejected';
     that.PromiseResult = data;
-    that.callbacks.forEach(item => {
-      item.onRejected(data);
+    setTimeout(() => {
+      that.callbacks.forEach(item => {
+        item.onRejected(data);
+      })
     })
   }
 
@@ -44,7 +48,7 @@ function Promise(executor) {
 Promise.prototype.then = function (onResolved, onRejected) {
   const that = this;
   // 判断回调函数参数(异常穿透 中间的任务不需要对失败做处理)；
-  if(typeof onRejected !== 'function') {
+  if (typeof onRejected !== 'function') {
     onRejected = reason => {
       throw reason;
     }
@@ -66,11 +70,15 @@ Promise.prototype.then = function (onResolved, onRejected) {
     // 如果成功
     if (this.PromiseState == 'fullfilled') {
       // 获取回调函数的执行结果
-      callback(onResolved);
+      setTimeout(() => {
+        callback(onResolved);
+      })
     }
     // 失败
     if (this.PromiseState == 'rejected') {
-      callback(onRejected);
+      setTimeout(() => {
+        callback(onRejected);
+      })
     }
 
     // 异步(pending)
@@ -94,29 +102,56 @@ Promise.prototype.then = function (onResolved, onRejected) {
 
 // 添加catch方法
 Promise.prototype.catch = function (onRejected) {
-  return this.then(undefined,onRejected);
+  return this.then(undefined, onRejected);
 }
 
 
 // 添加resolve方法
-Promise.resolve = function(value) {
-  return new Promise((resolve,reject) => {
-    if(value instanceof Promise) {
-      value.then((v)=>{resolve(v)},(r)=>{resolve(r)});
-    }else {
+Promise.resolve = function (value) {
+  return new Promise((resolve, reject) => {
+    if (value instanceof Promise) {
+      value.then((v) => { resolve(v) }, (r) => { resolve(r) });
+    } else {
       resolve(value);
     }
   });
 }
 
 // 添加reject方法
-Promise.reject = function(reason) {
-  return new Promise((resolve,reject)=>{
+Promise.reject = function (reason) {
+  return new Promise((resolve, reject) => {
     reject(reson);
   })
 }
 
 // 添加all方法
-Promise.all = function(proms) {
-  
+Promise.all = function (proms) {
+  return new Promise((resolve, reject) => {
+    let count = 0;
+    let newArr = [];
+    for (let i = 0; i < proms.length; i++) {
+      proms[i].then(v => {
+        newArr[i] = v;
+        count++;
+        if (count == proms.length) {
+          resolve(newArr);
+        }
+      }, r => {
+        reject(r);
+      })
+    }
+  })
+}
+
+// 添加race方法
+Promise.race = function (proms) {
+  return new Promise((resolve, reject) => {
+    for (let i = 0; i < proms.length; i++) {
+      proms[i].then(v => {
+        resolve(v);
+      }, r => {
+        reject(r);
+      })
+    }
+  });
 }
